@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\ViewModel\Adminhtml\FieldTypes;
+use Magento\Backend\Block\Template;
+use Magento\Framework\Escaper;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Blackbird\Model\Config\Source\IconPicker;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+/** @var IconPicker $iconSource */
+$iconSource = $viewModels->require(IconPicker::class);
+
+/** @var FieldTypes $fieldTypes */
+$fieldTypes = $viewModels->require(FieldTypes::class);
+
+$uid = (string) $block->getData('uid');
+$fieldName = (string) $block->getData('name');
+$fieldValue = \trim((string) ($block->getData('value') ?? ''));
+$hasError = $block->getData('hasError');
+$errorMessage = (string) ($block->getData('errorMessage') ?? '');
+
+$inputAttributes = (array) $block->getData('attributes');
+$filteredAttributes = $fieldTypes->getAttributesByKeys($inputAttributes, ['required', 'data-required', 'data-required-msg']);
+?>
+
+<div class="field-container"
+     id="field-container-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+     <?= $hasError ? 'data-error' : '' ?>
+     x-data="{ selectedIcon: '<?= $escaper->escapeJs((string) $fieldValue) ?>' }"
+>
+    <div class="grid grid-cols-5 gap-3">
+        <?php foreach ($iconSource->toOptionArray() as $icon): ?>
+            <button type="button"
+                    @click="selectedIcon = selectedIcon === '<?= $escaper->escapeJs($icon['value']) ?>' ? '' : '<?= $escaper->escapeJs($icon['value']) ?>';
+                        updateWireField(
+                            '<?= $escaper->escapeJs($uid) ?>',
+                            '<?= $escaper->escapeJs($fieldName) ?>',
+                            selectedIcon
+                        )
+                    "
+                    :class="selectedIcon === '<?= $escaper->escapeJs($icon['value']) ?>'
+                        ? 'border-gray-700 bg-gray-100'
+                        : 'border-transparent'"
+                    class="flex flex-col items-center gap-2 p-3 rounded-lg cursor-pointer transition-all border-2">
+                <?= /** @noEscape */ $icon['svg'] ?>
+                <span class="text-xs">
+                    <?= $escaper->escapeHtml(__($icon['label'])) ?>
+                </span>
+            </button>
+        <?php endforeach ?>
+    </div>
+
+    <input type="hidden"
+           x-model="selectedIcon"
+           id="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+           name="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+           value="<?= $escaper->escapeHtmlAttr((string) $fieldValue) ?>"
+           <?php foreach ($filteredAttributes as $attr => $value): ?>
+               <?= $escaper->escapeHtmlAttr($attr) ?>="<?= $escaper->escapeHtmlAttr($value) ?>"
+           <?php endforeach ?>>
+
+    <ul id="validation-messages-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+        class="validation-messages list-none">
+        <?php if ($hasError): ?>
+            <li class="error-message text-red text-sm mt-1">
+                <?= $escaper->escapeHtml($errorMessage) ?>
+            </li>
+        <?php endif ?>
+    </ul>
+</div>

@@ -1,0 +1,33 @@
+@property --num {
+    syntax: "<integer>";
+    initial-value: 0;
+    inherits: false;
+}
+
+@layer components {
+    .incrementer {
+        animation: counter var(--increment-duration) forwards ease-in-out;
+        counter-reset: num var(--num);
+        font: 800 24px 'inherit';
+
+        &::after {
+            content: counter(num);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .incrementer {
+            animation: counter 0.1ms forwards ease-in-out;
+            counter-reset: num var(--increment-value);
+        }
+    }
+}
+
+@keyframes counter {
+    from {
+        --num: 0;
+    }
+    to {
+        --num: var(--increment-value);
+    }
+}

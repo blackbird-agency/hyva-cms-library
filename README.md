@@ -1,29 +1,29 @@
-# README #
+# Polybel — Blackbird_HyvaCmsLibrary
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Reusable Hyvä CMS component library: file upload and icon picker custom field types, incrementer and video CMS elements.
 
-### What is this repository for? ###
+## Prerequisites
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+- PHP 8.2 or above
+- Magento 2.4 or above
+- Hyva commerce module csm 1.2.1 or above
+- ffmeg loccally install in /bin/
 
-### How do I get set up? ###
+## Setup
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Install via composer:
+```composer require blackbird/hyva-cms-library```
 
-### Contribution guidelines ###
+## Install the module
 
-* Writing tests
-* Code review
-* Other guidelines
+### Styles
+Move the tailwind/increment.css file into your tailwind/components/ folder.
 
-### Who do I talk to? ###
+### Install ffmeg
+Install ffmeg locally install in /bin/ https://ffmpeg.org/, in prod install ffmpeg binary on server
 
-* Repo owner or admin
-* Other community or team contact
+### Enable module
+
+Go to your Magento root directory and run the following magento command:
+
+```php bin/magento setup:upgrade```

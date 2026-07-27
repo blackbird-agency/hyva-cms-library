@@ -1,0 +1,63 @@
+<?php
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\Block\Element;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Framework\Escaper;
+use Hyva\Theme\ViewModel\HyvaCsp;
+
+/** @var Element $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+/** @var HyvaCsp $hyvaCsp */
+
+$value = (int) $block->getData('value');
+$unit  = (string) ($block->getData('unit') ?? '');
+$label = (string) ($block->getData('label') ?? '');
+$speed = (int) ($block->getData('speed') ?? 2000);
+
+$backgroundColor = (string) ($block->getData('background_color') ?? 'transparent');
+$textColor       = (string) ($block->getData('text_color') ?? 'transparent');
+
+$styles = \array_filter([
+    $backgroundColor !== 'transparent' ? 'background-color: ' . $escaper->escapeHtml($backgroundColor) : '',
+    $textColor !== 'transparent' ? 'color: ' . $escaper->escapeHtml($textColor) : '',
+]);
+$styleAttr = !empty($styles) ? ' style="' . \implode('; ', $styles) . ';"' : '';
+
+$classes = $block->getClasses();
+?>
+<div x-data="initIncrementer"
+    <?= /** @noEscape */ $block->renderBlockId() ?>
+    class="<?= $escaper->escapeHtmlAttr($classes) ?> flex flex-col max-lg:text-center"
+    <?= /** @noEscape */ $styleAttr ?>
+    <?= /** @noEscape */ $block->getEditorAttrs() ?>
+>
+    <p class="text-2xl font-extrabold uppercase">
+        <span class="sr-only"><?= $escaper->escapeHtml($value) ?></span>
+        <span style="--increment-duration: <?= $escaper->escapeHtml($speed) ?>ms; --increment-value: <?= $escaper->escapeHtml($value) ?>"
+              x-intersect="start()"
+              :class="startAnimation && 'incrementer'" aria-hidden="true"></span>
+        <?php if ($unit): ?>
+            <span>
+                <?= $escaper->escapeHtml($unit) ?>
+            </span>
+        <?php endif; ?>
+    </p>
+    <?php if ($label): ?>
+        <p class="font-lg font-bold mb-auto" <?= /** @noEscape */ $block->getEditorAttrs('label') ?>>
+            <?= $escaper->escapeHtml($label) ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script>
+    function initIncrementer() {
+        return {
+            startAnimation: false,
+            start() {
+                this.startAnimation = true;
+            }
+        }
+    }
+</script>
+<?php $hyvaCsp->registerInlineScript(); ?>

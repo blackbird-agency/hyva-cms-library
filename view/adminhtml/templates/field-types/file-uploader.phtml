@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\ViewModel\Adminhtml\FieldTypes;
+use Hyva\CmsLiveviewEditor\ViewModel\Icons;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Backend\Block\Template;
+use Magento\Framework\Escaper;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+/** @var FieldTypes $fieldTypes */
+$fieldTypes = $viewModels->require(FieldTypes::class);
+
+/** @var Icons $icons */
+$icons = $viewModels->require(Icons::class);
+
+$uid        = (string) $block->getData('uid');
+$fieldName  = (string) $block->getData('name');
+$fieldValue = $block->getData('value');
+$attributes = (array) $block->getData('attributes');
+$hasError   = $block->getData('hasError');
+$errorMessage = (string) ($block->getData('errorMessage') ?? '');
+
+$authorizedExtensions = (string) ($attributes['authorized_extensions'] ?? '');
+
+$fields = [
+    'url'        => $fieldValue['url'] ?? null,
+    'filename'   => $fieldValue['filename'] ?? null,
+    'extension'  => $fieldValue['extension'] ?? null,
+    'poster_url' => $fieldValue['poster_url'] ?? null,
+];
+
+$hasFile   = !empty($fields['url']);
+$hasPoster = !empty($fields['poster_url']);
+
+$sectionClasses = $hasFile ? '' : 'border border-dashed border-nimbus-200 rounded-md p-3 flex flex-col gap-2';
+?>
+<div class="field-container relative group"
+     id="field-container-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+     tabindex="-1"
+     <?= $hasError ? 'data-error' : '' ?>>
+    <input type="hidden"
+           id="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+           name="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+           value="<?= $escaper->escapeHtmlAttr(\json_encode($fields)) ?>"
+           @change="
+               updateField(
+                   '<?= $escaper->escapeHtmlAttr($uid) ?>',
+                   '<?= $escaper->escapeHtmlAttr($fieldName) ?>',
+                   JSON.parse($event.target.value)
+               )
+           ">
+
+    <button type="button"
+            @click="$dispatch('toggle-file-select', {
+                isOpen: true,
+                uid: '<?= $escaper->escapeHtmlAttr($uid) ?>',
+                fieldName: '<?= $escaper->escapeHtmlAttr($fieldName) ?>',
+                fieldValue: '<?= $escaper->escapeJs(\json_encode($fields)) ?>',
+                authorizedExtensions: '<?= $escaper->escapeJs($authorizedExtensions) ?>'
+            })"
+            class="w-full <?= $escaper->escapeHtmlAttr($sectionClasses) ?> text-nimbus-600 group-data-[error]:border-red-500 group-data-[error]:text-red-500">
+        <?php if ($hasFile && $hasPoster): ?>
+            <img src="<?= $escaper->escapeHtmlAttr($fields['poster_url'] . '?rand=' . \time()) ?>"
+                 width="356"
+                 height="240"
+                 loading="lazy"
+                 decoding="async"
+                 class="w-full max-h-60 block object-cover rounded-md">
+            <span class="absolute bottom-4 left-4 size-7 flex items-center justify-center bg-black/50 rounded text-white">
+                <?= /** @noEscape */ $icons->pencilHtml('', 16, 16) ?>
+            </span>
+        <?php elseif ($hasFile): ?>
+            <span class="flex items-center gap-2 p-2">
+                <?= /** @noEscape */ $icons->fileHtml('', 20, 20) ?>
+                <span class="text-sm truncate max-w-full">
+                    <?= $escaper->escapeHtml($fields['filename']) ?>
+                </span>
+            </span>
+            <span class="absolute bottom-4 left-4 size-7 flex items-center justify-center bg-black/50 rounded text-white">
+                <?= /** @noEscape */ $icons->pencilHtml('', 16, 16) ?>
+            </span>
+        <?php else: ?>
+            <p class="text-sm">
+                <?= $escaper->escapeHtml(__('No file selected')) ?>
+            </p>
+            <span class="btn btn-primary justify-center">
+                <?= /** @noEscape */ $icons->fileHtml('', 16, 16) ?>
+                <?= $escaper->escapeHtml(__('Select File')) ?>
+            </span>
+        <?php endif ?>
+    </button>
+
+    <?php if ($hasFile): ?>
+        <button type="button"
+                @click="
+                    updateWireField(
+                        '<?= $escaper->escapeHtmlAttr($uid) ?>',
+                        '<?= $escaper->escapeHtmlAttr($fieldName) ?>',
+                        null
+                    )
+                "
+                class="absolute bottom-4 right-4 size-7 flex items-center justify-center bg-black/50 rounded text-white">
+            <?= /** @noEscape */ $icons->trashHtml('', 16, 16) ?>
+        </button>
+    <?php endif ?>
+
+    <ul id="validation-messages-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
+        class="validation-messages list-none">
+        <?php if ($hasError): ?>
+            <li class="error-message text-red-600 text-sm mt-1">
+                <?= $escaper->escapeHtml($errorMessage) ?>
+            </li>
+        <?php endif ?>
+    </ul>
+</div>

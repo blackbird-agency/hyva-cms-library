@@ -1,0 +1,31 @@
+{
+    "name": "blackbird/hyva-cms-library",
+    "version": "1.0.0",
+    "description": "Reusable Hyvä CMS component library",
+    "type": "magento2-module",
+    "authors": [
+        {
+            "name": "Blackbird Agency",
+            "email": "contact@bird.eu",
+            "homepage": "https://black.bird.eu/"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "magento/framework": "^2.4",
+        "hyva-themes/commerce-module-cms": "^1.2.1",
+        "php-ffmpeg/php-ffmpeg": "^1.4",
+        "symfony/process": "^6.4 || ^7.0"
+    },
+    "license": [
+        "MIT"
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Blackbird\\HyvaCmsLibrary\\": ""
+        }
+    }
+}

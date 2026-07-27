@@ -1,0 +1,157 @@
+{
+  "incrementer": {
+    "label": "Incrementer",
+    "category": "Media",
+    "icon": "Blackbird_HyvaCmsLibrary::images/components/trending-up.svg",
+    "template": "Blackbird_HyvaCmsLibrary::elements/incrementer/default.phtml",
+    "content": {
+      "value": {
+        "type": "number",
+        "label": "Value"
+      },
+      "unit": {
+        "type": "text",
+        "label": "Unit"
+      },
+      "label": {
+        "type": "text",
+        "label": "Label"
+      },
+      "speed": {
+        "type": "number",
+        "label": "Animation Speed (ms)",
+        "default_value": 2500
+      }
+    },
+    "advanced": {
+      "includes": [
+        "Hyva_CmsBase::etc/hyva_cms/default_advanced.json"
+      ]
+    }
+  },
+  "video": {
+    "label": "Vidéo",
+    "category": "Media",
+    "icon": "Hyva_CmsBase::images/components/film.svg",
+    "template": "Blackbird_HyvaCmsLibrary::elements/video/default.phtml",
+    "content": {
+      "variants": {
+        "type": "variant",
+        "label": "Variant",
+        "options": [
+          {
+            "label": "Default",
+            "value": "Blackbird_HyvaCmsLibrary::elements/video/default.phtml"
+          }
+        ]
+      },
+      "title": {
+        "type": "text",
+        "label": "Title",
+        "default_value": "Title",
+        "translate": true
+      },
+      "subtitle": {
+        "type": "richtext",
+        "label": "Subtitle",
+        "default_value": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus.",
+        "translate": true
+      },
+      "link": {
+        "type": "link",
+        "label": "Link"
+      },
+      "link_appearance": {
+        "label": "CTA Appearance",
+        "type": "select",
+        "options": "Hyva\\CmsBase\\Model\\Config\\Source\\BannerLinkAppearances",
+        "attributes": {
+          "comment": "When using multiple buttons, the option 'Overlay' is ignored"
+        }
+      },
+      "use_link_overlay": {
+        "label": "Make the Banner Clickable",
+        "type": "boolean",
+        "default_value": false,
+        "attributes": {
+          "comment": "When using multiple buttons, this option is ignored, This setting is also used if the CTA Appearance is set to 'Overlay'"
+        }
+      },
+      "video": {
+        "type": "custom_type",
+        "custom_type": "file_uploader",
+        "label": "Mobile video",
+        "attributes": {
+          "authorized_extensions": "mp4,avi,webm"
+        }
+      },
+      "video_desktop": {
+        "type": "custom_type",
+        "custom_type": "file_uploader",
+        "label": "Desktop video",
+        "attributes": {
+          "authorized_extensions": "mp4,avi,webm",
+          "required": true
+        }
+      },
+      "description": {
+        "type": "text",
+        "label": "Description",
+        "translate": true,
+        "attributes": {
+          "comment": "Description used for assistive technology to describe the content."
+        }
+      },
+      "lazyload": {
+        "type": "boolean",
+        "label": "Lazyload",
+        "default_value": true
+      },
+      "autoplay": {
+        "type": "boolean",
+        "label": "Autoplay",
+        "default_value": false
+      },
+      "loop": {
+        "type": "boolean",
+        "label": "Loop",
+        "default_value": true
+      },
+      "show_controls": {
+        "type": "boolean",
+        "label": "Show controls",
+        "default_value": true
+      }
+    },
+    "design": {
+      "includes": [
+        "Hyva_CmsBase::etc/hyva_cms/default_design.json"
+      ],
+      "title_color": {
+        "type": "color",
+        "label": "Title Color"
+      },
+      "text_color": {
+        "type": "color",
+        "label": "Text Color",
+        "attributes": {
+          "data-pattern": "^#?[a-zA-Z0-9,().\\-\\s%]+$",
+          "data-pattern-msg": "Value must be a valid CSS background-color (e.g. hex, rgb[a], hsl[a], color name, or CSS variable)"
+        }
+      },
+      "content_alignment": {
+        "type": "select",
+        "label": "Content Alignment",
+        "options": "Hyva\\CmsBase\\Model\\Config\\Source\\ContentAlignment"
+      },
+      "text_align": {
+        "type": "text-align",
+        "label": "Text Align",
+        "default_value": null
+      }
+    },
+    "advanced": {
+      "includes": "Hyva_CmsBase::etc/hyva_cms/default_advanced.json"
+    }
+  }
+}

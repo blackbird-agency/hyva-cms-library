@@ -1,0 +1,148 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\Block\Element;
+use Magento\Framework\Escaper;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HyvaCsp;
+use Blackbird\ViewModel\VideoSource;
+use Blackbird\HyvaCmsLibrary\ViewModel\LinkAppearance;
+
+/**
+ * @var Element $block
+ * @var Escaper $escaper
+ * @var ViewModelRegistry $viewModels
+ */
+/** @var HyvaCsp $hyvaCsp */
+
+
+$title = $block->getTitle();
+$subtitle = $block->getSubtitle();
+$description = $block->getDescription();
+$children = $block->getChildren();
+$hasChildren = !empty($children);
+
+// Styles
+$position = (string) $block->getContentAlignment() ?: 'center stretch';
+$textAlign = (string) $block->getTextAlign();
+$bgColor = (string) $block->getBackgroundColor() ?: '#1e293b'; // slate-800
+$fgColor = (string) $block->getTextColor() ?: '#f8fafc'; // slate-50
+$titleColor = (string) $block->getTitleColor();
+$blockClasses = implode(' ', array_filter([
+    'w-full',
+    $textAlign,
+    $block->getClasses()
+]));
+
+// Block classes
+$videoClasses = 'w-full h-full object-cover';
+
+$bannerStyles = implode('; ', array_filter([
+    $bgColor ? "--banner-bg: {$bgColor}" : '',
+    $fgColor ? "--banner-color: {$fgColor}" : '',
+    ($bgColor || $fgColor) ? 'background: var(--banner-bg); color: var(--banner-color)' : '',
+]));
+
+$bannerContentClasses = 'isolate p-12 md:p-20';
+$bannerContentStyles = $position ? "place-self: {$position}" : '';
+$bannerTitleStyles = $titleColor ? "color: {$titleColor}" : '';
+
+//Link data
+$link = $block->getLinkData($block->getData('link') ?? [
+    'url' => $block->getUrl('home'),
+    'label' => __('Check it out!'),
+]);
+
+$linkAppearance = $block->getLinkAppearance() ?: 'btn-primary'; // 'btn-primary', 'btn-secondary', 'btn', 'link', 'overlay'
+$useLinkOverlay = !$hasChildren ?
+    ($block->getUseLinkOverlay() !== null ? $block->getUseLinkOverlay() : $linkAppearance === "overlay")
+    : false;
+$bannerLinkClasses = implode(' ', array_filter([
+    $linkAppearance === 'btn-primary' ? 'btn btn-primary inline-flex' : '',
+    $linkAppearance === 'btn-secondary' ? 'btn btn-secondary inline-flex' : '',
+    $linkAppearance === 'btn' ? 'btn inline-flex' : '',
+    $linkAppearance === 'link' ? 'font-medium underline hover:no-underline' : '',
+    $useLinkOverlay ? 'before:absolute before:inset-0 before:transition-opacity before:duration-500 before:opacity-0 before:bg-current hover:before:opacity-10' : ''
+]));
+
+//Video data
+$videoSourceViewModel = $viewModels->require(VideoSource::class);
+
+$desktopVideo = $videoSourceViewModel->extractVideoData($block->getVideoDesktop());
+$mobileVideo  = $block->getVideo() ? $videoSourceViewModel->extractVideoData($block->getVideo()) : $desktopVideo;
+
+$hasDesktopVideo = $desktopVideo['url'] !== '';
+$hasMobileVideo  = $mobileVideo['url'] !== '';
+
+$posterDesktopUrl = $desktopVideo['poster'];
+$posterMobileUrl = $mobileVideo['poster'];
+
+$videoLoading = (string)$block->getData('loading') ? 'lazy' : 'eager';
+$autoplay = (bool)$block->getAutoplay();
+$loop = (bool)$block->getLoop();
+$showControls = (bool) $block->getShowControls();
+
+?>
+<div x-data class="<?= $escaper->escapeHtmlAttr($blockClasses) ?>" style="<?= $escaper->escapeHtmlAttr($bannerStyles) ?>"
+         <?= /** @noEscape */$block->renderBlockId() ?>
+>
+    <div class="relative grid gap-8 *:col-start-1 *:row-start-1">
+        <?php if($description || $subtitle) : ?>
+            <div class="<?= $escaper->escapeHtmlAttr($bannerContentClasses) ?>"
+                 style="<?= $escaper->escapeHtmlAttr($bannerContentStyles) ?>">
+                <p class="mb-6 text-xl lg:text-2xl font-bold uppercase"
+                   style="<?= $escaper->escapeHtmlAttr($bannerTitleStyles) ?>"
+                >
+                    <?= $escaper->escapeHtml($title)?>
+                </p>
+                <div><?= $escaper->escapeHtml($subtitle, ['p','strong', 'i', 'a'])?></div>
+                <div class="mt-8">
+                    <?php if ($link['url']): ?>
+                        <a
+                            href="<?= $escaper->escapeUrl($link['url']) ?>"
+                            <?= ($link['open_in_new'] ?? false) ? 'target="_blank" rel="noopener"' : '' ?>
+                            class="<?= $escaper->escapeHtmlAttr($bannerLinkClasses) ?>"
+                            <?= /** @noEscape */ $block->getEditorAttrs('link') ?>
+                        >
+                            <?= $escaper->escapeHtml($link['label'] ?? __('Go to %1', $link['url'])) ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif ?>
+        <?php if($hasDesktopVideo) :?>
+            <figure>
+                <?php if($description) : ?>
+                    <figcaption class="sr-only"><?= $escaper->escapeHtml($description) ?></figcaption>
+                <?php endif ?>
+                <template x-if="window.innerWidth < <?= $videoSourceViewModel::DESKTOP_BREAKPOINT ?>">
+                    <video class="<?= $escaper->escapeHtmlAttr($videoClasses) ?>"
+                           src="<?= $escaper->escapeHtmlAttr($mobileVideo['url'] ?? '') ?>"
+                           type="<?= $escaper->escapeHtmlAttr($mobileVideo['type'] ?? '') ?>"
+                           loading="<?= $escaper->escapeHtmlAttr($videoLoading) ?>"
+                           <?php if($posterMobileUrl) : ?>poster="<?= $escaper->escapeHtmlAttr($posterMobileUrl) ?>"<?php endif ?>
+                           <?php if($autoplay) : ?>muted autoplay<?php endif ?>
+                           <?php if($showControls) :?>controls<?php endif?>
+                           <?php if($loop) : ?>loop<?php endif ?>
+                           width="640"
+                           height="1000"
+                    />
+                </template>
+                <template x-if="window.innerWidth >= <?= $videoSourceViewModel::DESKTOP_BREAKPOINT ?>">
+                    <video class="<?= $escaper->escapeHtmlAttr($videoClasses) ?>"
+                           src="<?= $escaper->escapeHtmlAttr($desktopVideo['url'] ?? '') ?>"
+                           type="<?= $escaper->escapeHtmlAttr($desktopVideo['type'] ?? '') ?>"
+                           loading="<?= $escaper->escapeHtmlAttr($videoLoading) ?>"
+                           <?php if($posterMobileUrl) : ?>poster="<?= $escaper->escapeHtmlAttr($posterDesktopUrl) ?>"<?php endif ?>
+                           <?php if($autoplay) : ?>muted autoplay<?php endif ?>
+                           <?php if($showControls) :?>controls<?php endif?>
+                           <?php if($loop) : ?>loop<?php endif ?>
+                           width="960"
+                           height="540"
+                    />
+                </template>
+            </figure>
+        <?php endif ?>
+    </div>
+</div>
