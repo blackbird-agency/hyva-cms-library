@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Observer;
+namespace Blackbird\HyvaCmsLibrary\Observer;
 
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Event\Observer;

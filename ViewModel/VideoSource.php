@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\ViewModel;
+namespace Blackbird\HyvaCmsLibrary\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 

@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Controller\Adminhtml\FileUpload;
+namespace Blackbird\HyvaCmsLibrary\Controller\Adminhtml\FileUpload;
 
-use Blackbird\Model\Config\Source\FileUploader;
+use Blackbird\HyvaCmsLibrary\Model\Config\Source\FileUploader;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
-use function Blackbird\HyvaCmsLibrary\Controller\Adminhtml\FileUpload\__;
 
 class Upload extends Action implements HttpPostActionInterface
 {

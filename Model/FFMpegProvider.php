@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Model;
+namespace Blackbird\HyvaCmsLibrary\Model;
 
 use FFMpeg\FFMpeg;
 use Symfony\Component\Process\ExecutableFinder;
-use const Blackbird\HyvaCmsLibrary\Model\BP;
 
 class FFMpegProvider
 {

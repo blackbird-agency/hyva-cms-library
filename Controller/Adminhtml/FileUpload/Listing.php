@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Controller\Adminhtml\FileUpload;
+namespace Blackbird\HyvaCmsLibrary\Controller\Adminhtml\FileUpload;
 
-use Blackbird\Model\Config\Source\FileUploader;
+use Blackbird\HyvaCmsLibrary\Model\Config\Source\FileUploader;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;

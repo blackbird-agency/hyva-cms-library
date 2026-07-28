@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Model\Config\Source;
+namespace Blackbird\HyvaCmsLibrary\Model\Config\Source;
 
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;

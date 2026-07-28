@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Blackbird\Model\Config\Source;
+namespace Blackbird\HyvaCmsLibrary\Model\Config\Source;
 
-use Blackbird\Model\FFMpegProvider;
+use Blackbird\HyvaCmsLibrary\Model\FFMpegProvider;
 use FFMpeg\Coordinate\TimeCode;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\LocalizedException;
@@ -15,7 +15,6 @@ use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
-use function Blackbird\HyvaCmsLibrary\Model\Config\Source\__;
 
 class FileUploader implements ArgumentInterface
 {
