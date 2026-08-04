@@ -1,6 +1,6 @@
 {
     "name": "blackbird/hyva-cms-library",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Reusable Hyvä CMS component library",
     "type": "magento2-module",
     "authors": [
