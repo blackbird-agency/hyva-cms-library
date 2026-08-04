@@ -1,4 +1,4 @@
-# Polybel — Blackbird_HyvaCmsLibrary
+# Blackbird_HyvaCmsLibrary
 
 Reusable Hyvä CMS component library: file upload and icon picker custom field types, incrementer and video CMS elements.
 
@@ -20,7 +20,8 @@ Install via composer:
 Move the tailwind/increment.css file into your tailwind/components/ folder.
 
 ### Install ffmeg
-Install ffmeg locally install in /bin/ https://ffmpeg.org/, in prod install ffmpeg binary on server
+You should have ffmeg for the module to work. To install it use
+```composer require php-ffmpeg/php-ffmpeg```
 
 ### Enable module
 
