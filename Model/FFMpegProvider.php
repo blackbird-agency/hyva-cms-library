@@ -9,8 +9,8 @@ use Symfony\Component\Process\ExecutableFinder;
 
 class FFMpegProvider
 {
-    private const string FFMPEG_BIN  = 'ffmpeg';
-    private const string FFPROBE_BIN = 'ffprobe';
+    private const FFMPEG_BIN  = 'ffmpeg';
+    private const FFPROBE_BIN = 'ffprobe';
 
     public function __construct(
         private readonly ExecutableFinder $executableFinder,

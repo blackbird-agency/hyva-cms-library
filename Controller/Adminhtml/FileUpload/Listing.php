@@ -13,7 +13,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 
 class Listing extends Action implements HttpGetActionInterface
 {
-    public const string ADMIN_RESOURCE = 'Blackbird_HyvaCmsLibrary::file_upload';
+    public const ADMIN_RESOURCE = 'Blackbird_HyvaCmsLibrary::file_upload';
 
     public function __construct(
         Context $context,

@@ -11,7 +11,7 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 class IconPicker implements ArgumentInterface
 {
-    private const string MODULE_NAME = 'Blackbird_HyvaCmsLibrary';
+    private const MODULE_NAME = 'Blackbird_HyvaCmsLibrary';
 
     /** @var array<int, array{value: string, label: string, svg: string}>|null */
     private ?array $options = null;

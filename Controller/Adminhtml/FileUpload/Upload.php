@@ -14,7 +14,7 @@ use Magento\Framework\Exception\LocalizedException;
 
 class Upload extends Action implements HttpPostActionInterface
 {
-    public const string ADMIN_RESOURCE = 'Blackbird_HyvaCmsLibrary::file_upload';
+    public const ADMIN_RESOURCE = 'Blackbird_HyvaCmsLibrary::file_upload';
 
     public function __construct(
         Context $context,

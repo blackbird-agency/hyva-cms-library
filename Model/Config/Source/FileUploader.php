@@ -49,10 +49,10 @@ class FileUploader implements ArgumentInterface
     ];
 
     /** @var string[] */
-    private const array VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
+    private const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
 
     /** @var string[] */
-    private const array IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
+    private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
 
     public function __construct(
         private readonly UploaderFactory $uploaderFactory,
