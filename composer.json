@@ -1,6 +1,6 @@
 {
     "name": "blackbird/hyva-cms-library",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Reusable Hyvä CMS component library",
     "type": "magento2-module",
     "authors": [
@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "magento/product-community-edition": "^2.4",
         "hyva-themes/commerce-module-cms": "^1.2.1",
         "php-ffmpeg/php-ffmpeg": "^1.4",
