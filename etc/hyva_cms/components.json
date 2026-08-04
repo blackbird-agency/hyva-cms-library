@@ -29,6 +29,53 @@
       ]
     }
   },
+  "newsletter": {
+    "label": "Newsletter",
+    "description": "Newsletter subscription form with configurable title and subtitle.",
+    "category": "Content",
+    "icon": "Hyva_CmsBase::images/components/block.svg",
+    "template": "Blackbird_HyvaCmsLibrary::elements/newsletter/default.phtml",
+    "content": {
+      "variants": {
+        "type": "variant",
+        "label": "Variant",
+        "options": [
+          {
+            "label": "Default",
+            "value": "Blackbird_HyvaCmsLibrary::elements/newsletter/default.phtml"
+          }
+        ]
+      },
+      "title": {
+        "type": "text",
+        "label": "Title",
+        "default_value": "La Newsletter",
+        "translate": true
+      },
+      "subtitle": {
+        "type": "text",
+        "label": "Subtitle",
+        "default_value": "Inscrivez vous à notre newsletter pour recevoir nos offres, promotions et nouveautés en avant-première.",
+        "translate": true
+      }
+    },
+    "design": {
+      "includes": [
+        "Hyva_CmsBase::etc/hyva_cms/default_design.json"
+      ],
+      "text_color": {
+        "type": "color",
+        "label": "Text Color",
+        "attributes": {
+          "data-pattern": "^#?[a-zA-Z0-9,().\\-\\s%]+$",
+          "data-pattern-msg": "Value must be a valid CSS background-color (e.g. hex, rgb[a], hsl[a], color name, or CSS variable)"
+        }
+      }
+    },
+    "advanced": {
+      "includes": "Hyva_CmsBase::etc/hyva_cms/default_advanced.json"
+    }
+  },
   "video": {
     "label": "Vidéo",
     "category": "Media",

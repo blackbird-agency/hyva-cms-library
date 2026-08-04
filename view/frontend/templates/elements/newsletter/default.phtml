@@ -1,0 +1,125 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\Block\Element;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\LucideIcons;
+use Magento\Framework\Escaper;
+use Hyva\Theme\ViewModel\HyvaCsp;
+
+/**
+ * @var Element $block
+ * @var Escaper $escaper
+ * @var ViewModelRegistry $viewModels
+ */
+/** @var HyvaCsp $hyvaCsp */
+
+$lucideIcons = $viewModels->require(LucideIcons::class);
+
+$title = $block->getTitle();
+$subtitle = $block->getSubtitle();
+
+//Styles
+$backgroundColor = (string) ($block->getData('background_color') ?? 'transparent');
+$textColor       = (string) ($block->getData('text_color') ?? 'transparent');
+
+$styles = \array_filter([
+    $backgroundColor !== 'transparent' ? 'background-color: ' . $escaper->escapeHtml($backgroundColor) : '',
+    $textColor !== 'transparent' ? 'color: ' . $escaper->escapeHtml($textColor) : '',
+]);
+$styleAttr = !empty($styles) ? ' style="' . implode('; ', $styles) . ';"' : '';
+$classes = $block->getClasses();
+?>
+<section
+    class="py-16 lg:py-8 <?= $escaper->escapeHtmlAttr($classes) ?>"
+    <?= /** @noEscape */
+    $block->renderBlockId() ?>
+    <?= /** @noEscape */ $styleAttr ?>
+    <?= /** @noEscape */ $block->getEditorAttrs() ?>
+>
+    <div class="container">
+        <div class="max-w-4xl mx-auto text-center">
+            <?php if ($title): ?>
+                <h2 class="mb-6">
+                    <?= $escaper->escapeHtml($title) ?>
+                </h2>
+            <?php endif; ?>
+            <?php if ($subtitle): ?>
+                <p class="mb-4 text-xl">
+                    <?= $escaper->escapeHtml($subtitle) ?>
+                </p>
+            <?php endif; ?>
+            <form x-data="initNewsletterCmsForm()"
+                action="<?= $escaper->escapeUrl($block->getUrl('newsletter/subscriber/new')) ?>"
+                method="post"
+                @submit.prevent="submitForm($event)"
+            >
+                <?= $block->getBlockHtml('formkey') ?>
+                <div class="field choice justify-center">
+                    <input
+                        id="newsletter-consent"
+                        type="checkbox"
+                        name="consent"
+                        required
+                        class="mt-0.5 shrink-0"
+                    >
+                    <label for="newsletter-consent"
+                           class="label text-sm"
+                    >
+                        <?= __("I've read the %1 and accept to receive personalized communications from Polybel.",
+                        '<a href="'.$block->getUrl("privacy-policy").'" class="underline" target="_blank" rel="noopener noreferrer">'.__('privacy policy').'</a>') ?>
+                    </label>
+                </div>
+
+                <div class="relative flex gap-2 justify-center max-w-xl mx-auto mt-6">
+                    <span class="absolute top-1/2 left-2 md:left-5 -translate-y-1/2 text-primary">
+                        <?= /** @noEscape */
+                        $lucideIcons->mailHtml('w-5 h-5', 20, 20 , ['aria-hidden'=> 'true']) ?>
+                    </span>
+                    <label for="newsletter-email" class="sr-only"><?= __('Email') ?></label>
+                    <input
+                        id="newsletter-email"
+                        type="email"
+                        name="email"
+                        required
+                        autocomplete="email"
+                        class="w-full pl-9 md:pl-15 text-black"
+                        placeholder="<?= $escaper->escapeHtmlAttr(__('Your email address')) ?>"
+                    >
+                    <button type="submit" class="btn btn-secondary w-fit whitespace-nowrap" aria-label="<?= __('Subscribe to newsletter') ?>">
+                            <?= $escaper->escapeHtml(__('Subscribe')) ?>
+                    </button>
+                </div>
+                <template x-if="displayErrorMessage">
+                    <div class="text-red text-sm w-full text-left">
+                        <template x-for="errorMessage in errorMessages">
+                            <p x-html="errorMessage"></p>
+                        </template>
+                    </div>
+                </template>
+            </form>
+        </div>
+    </div>
+    <script>
+        function initNewsletterCmsForm() {
+            return {
+                errors: 0,
+                displayErrorMessage: false,
+                errorMessages: [],
+                setErrorMessages(messages) {
+                    this.errorMessages = [messages];
+                    this.displayErrorMessage = this.errorMessages.length > 0;
+                },
+                submitForm($event) {
+                    if (this.errors === 0) {
+                        $event.target.submit();
+                    }
+                }
+            };
+        }
+
+        window.addEventListener('alpine:init', () => Alpine.data('initNewsletterCmsForm', initNewsletterCmsForm), {once: true});
+    </script>
+    <?php $hyvaCsp->registerInlineScript(); ?>
+</section>
