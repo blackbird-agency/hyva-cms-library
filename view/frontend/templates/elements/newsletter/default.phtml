@@ -32,9 +32,7 @@ $styleAttr = !empty($styles) ? ' style="' . implode('; ', $styles) . ';"' : '';
 $classes = $block->getClasses();
 ?>
 <section
-    class="py-16 lg:py-8 <?= $escaper->escapeHtmlAttr($classes) ?>"
-    <?= /** @noEscape */
-    $block->renderBlockId() ?>
+    class="<?= $escaper->escapeHtmlAttr($classes) ?>"
     <?= /** @noEscape */ $styleAttr ?>
     <?= /** @noEscape */ $block->getEditorAttrs() ?>
 >
@@ -67,7 +65,7 @@ $classes = $block->getClasses();
                     <label for="newsletter-consent"
                            class="label text-sm"
                     >
-                        <?= __("I've read the %1 and accept to receive personalized communications from Polybel.",
+                        <?= __("I've read the %1 and accept to receive personalized communications.",
                         '<a href="'.$block->getUrl("privacy-policy").'" class="underline" target="_blank" rel="noopener noreferrer">'.__('privacy policy').'</a>') ?>
                     </label>
                 </div>

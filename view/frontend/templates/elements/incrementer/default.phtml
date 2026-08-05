@@ -28,7 +28,6 @@ $styleAttr = !empty($styles) ? ' style="' . \implode('; ', $styles) . ';"' : '';
 $classes = $block->getClasses();
 ?>
 <div x-data="initIncrementer"
-    <?= /** @noEscape */ $block->renderBlockId() ?>
     class="<?= $escaper->escapeHtmlAttr($classes) ?> flex flex-col max-lg:text-center"
     <?= /** @noEscape */ $styleAttr ?>
     <?= /** @noEscape */ $block->getEditorAttrs() ?>

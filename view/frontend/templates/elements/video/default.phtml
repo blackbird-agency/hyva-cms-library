@@ -84,8 +84,8 @@ $loop = (bool)$block->getLoop();
 $showControls = (bool) $block->getShowControls();
 
 ?>
-<div x-data class="<?= $escaper->escapeHtmlAttr($blockClasses) ?>" style="<?= $escaper->escapeHtmlAttr($bannerStyles) ?>"
-         <?= /** @noEscape */$block->renderBlockId() ?>
+<div x-data class="<?= $escaper->escapeHtmlAttr($blockClasses) ?>"
+     style="<?= $escaper->escapeHtmlAttr($bannerStyles) ?>"
 >
     <div class="relative grid gap-8 *:col-start-1 *:row-start-1">
         <?php if($description || $subtitle) : ?>
