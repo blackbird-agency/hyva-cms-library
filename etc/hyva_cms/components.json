@@ -29,6 +29,61 @@
       ]
     }
   },
+  "mosaic": {
+    "label": "Mosaic",
+    "category": "Media",
+    "icon": "Blackbird_HyvaCmsLibrary::images/components/layout-grid.svg",
+    "template": "Blackbird_HyvaCmsLibrary::elements/mosaic/default.phtml",
+    "content": {
+      "link": {
+        "type": "link",
+        "label": "Link"
+      },
+      "link_appearance": {
+        "label": "CTA Appearance",
+        "type": "select",
+        "default_value": "btn",
+        "options": "Hyva\\CmsBase\\Model\\Config\\Source\\CardLinkAppearances"
+      },
+      "mosaic_is_clickable": {
+        "label": "Make the Complete Mosaic Clickable",
+        "type": "boolean",
+        "default_value": false
+      },
+      "mobile_image": {
+        "type": "image",
+        "label": "Mobile Image"
+      },
+      "image": {
+        "type": "image",
+        "label": "Desktop Image",
+        "attributes": {
+          "required": true
+        }
+      },
+      "opacity": {
+        "type": "boolean",
+        "label": "Image opacity (desktop)",
+        "default_value": true
+      },
+      "icon": {
+        "type": "custom_type",
+        "custom_type": "icon_picker",
+        "label": "Icon"
+      }
+    },
+    "design": {
+      "text_color": {
+        "type": "color",
+        "label": "Text Color"
+      }
+    },
+    "advanced": {
+      "includes": [
+        "Hyva_CmsBase::etc/hyva_cms/default_advanced.json"
+      ]
+    }
+  },
   "newsletter": {
     "label": "Newsletter",
     "description": "Newsletter subscription form with configurable title and subtitle.",

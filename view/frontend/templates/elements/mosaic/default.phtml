@@ -1,0 +1,95 @@
+<?php
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\Block\Element;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\Media;
+use Blackbird\HyvaCmsLibrary\ViewModel\SvgIcons;
+use Magento\Framework\Escaper;
+
+/** @var Element $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+$mediaViewModel = $viewModels->require(Media::class);
+$customSvgIcons = $viewModels->require(SvgIcons::class);
+$link = $block->getData('link');
+$linkData = $link ? $block->getLinkData($link) : null;
+$linkAppearance = $block->getLinkAppearance() ?: 'btn';
+$mosaicIsClickable = $block->getMosaicIsClickable() !== null ? $block->getMosaicIsClickable() : false;
+
+$image = $block->getData('image');
+$mobileImage = $block->getData('mobile_image') ?: $image;
+$icon = $block->getData('icon');
+$imageLoading = $block->getData('loading') ?? 'lazy';
+
+//Styles
+$position  = (string) $block->getContentAlignment() ?: 'center stretch';
+$textColor = (string) ($block->getData('text_color') ?? 'transparent');
+
+$styles = array_filter([
+    $textColor !== 'transparent' ? "color: {$escaper->escapeHtml($textColor)}" : ''
+]);
+$styleAttr = !empty($styles) ? ' style="' . implode('; ', $styles) . ';"' : '';
+
+$mosaicLinkClasses = implode(' ', array_filter([
+    $linkAppearance === 'btn-primary' ? 'btn btn-primary inline-flex' : '',
+    $linkAppearance === 'btn-secondary' ? 'btn btn-secondary inline-flex' : '',
+    $linkAppearance === 'btn' ? 'btn inline-flex' : '',
+    $linkAppearance === 'link' ? 'font-medium underline hover:no-underline' : '',
+    $mosaicIsClickable ? 'before:absolute before:inset-0' : ''
+]));
+$classes = implode(' ', array_filter([
+    'group relative w-full h-48 lg:h-130 overflow-hidden grid gap-8 *:col-start-1 *:row-start-1',
+    $block->getClasses()
+]));
+
+$linkContentClasses = 'isolate m-6';
+$linkContentStyles = $position ? "place-self: {$position}" : '';
+
+$imageClasses = implode(' ', array_filter([
+    'w-full h-full object-cover',
+    $block->getOpacity() ? 'lg:opacity-20 group-hover:opacity-100 transition-opacity duration-300' : ''
+]));
+$pictureClasses = 'absolute w-full h-full';
+
+
+?>
+
+<div class="<?= $escaper->escapeHtmlAttr($classes) ?>"
+    <?= /** @noEscape */ $styleAttr ?>
+    <?= /** @noEscape */$block->getEditorAttrs() ?>
+>
+    <?php if ($image): ?>
+        <?php
+        $desktopImage = $block->getData('desktop_image') ?: $image;
+        $imageData = array_filter([
+            $block->getResponsiveImageData($image, 'hyva_cms_mosaic'),
+            $block->getResponsiveImageData($desktopImage, 'hyva_cms_mosaic_desktop', ['media' => '(min-width: 1024px)'])
+        ]);
+        $imgTagAttributes = ['alt' => '', 'loading' => $imageLoading, 'class' => $imageClasses];
+        $pictureTagAttributes = ['class' => $pictureClasses];
+        ?>
+        <?= /** @noEscape */
+$mediaViewModel->getResponsivePictureHtml($imageData, $imgTagAttributes, $pictureTagAttributes) ?>
+    <?php endif; ?>
+
+    <?php if ($icon): ?>
+        <div class="absolute top-6 left-6" aria-hidden="true">
+            <?= $customSvgIcons->renderHtml($icon, 'w-6 h-6', 24, 24, []) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($linkData): ?>
+        <div class="<?= $escaper->escapeHtmlAttr($linkContentClasses) ?>"
+             style="<?= $escaper->escapeHtmlAttr($linkContentStyles) ?>">
+            <a href="<?= $escaper->escapeUrl($linkData['url']) ?>"
+                <?= ($link['open_in_new'] ?? false) ? 'target="_blank" rel="noopener"' : '' ?>
+               class="<?= $escaper->escapeHtmlAttr($mosaicLinkClasses) ?>"
+                <?= /** @noEscape */ $block->getEditorAttrs('link') ?>
+            >
+                <?= $escaper->escapeHtml($linkData['label']) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
