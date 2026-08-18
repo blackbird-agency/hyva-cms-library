@@ -50,7 +50,7 @@ Go to your Magento root directory, then run the following Magento commands:
 **If you are in production mode, do not forget to recompile and redeploy the static resources, or to use the `--keep-generated` option.**
 
 ```shell
-bin/magento module:enable Blackbird_CSPManager
+bin/magento module:enable Blackbird_HyvaCmsLibrary
 bin/magento setup:upgrade
 bin/magento cache:flush
 ```
