@@ -18,11 +18,11 @@ use Psr\Log\LoggerInterface;
 
 class FileUploader implements ArgumentInterface
 {
-    private const string FILES_SUBDIR   = 'hyva_cms/files';
-    private const string POSTERS_SUBDIR = 'hyva_cms/posters';
+    protected const FILES_SUBDIR   = 'hyva_cms/files';
+    protected const POSTERS_SUBDIR = 'hyva_cms/posters';
 
     /** @var array<string, string> extension => MIME type */
-    private const array MIME_TYPE_MAP = [
+    protected const MIME_TYPE_MAP = [
         'pdf'  => 'application/pdf',
         'doc'  => 'application/msword',
         'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -49,18 +49,18 @@ class FileUploader implements ArgumentInterface
     ];
 
     /** @var string[] */
-    private const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
+    protected const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
 
     /** @var string[] */
-    private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
+    protected const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
 
     public function __construct(
-        private readonly UploaderFactory $uploaderFactory,
-        private readonly Filesystem $filesystem,
-        private readonly StoreManagerInterface $storeManager,
-        private readonly IoFile $ioFile,
-        private readonly LoggerInterface $logger,
-        private readonly FFMpegProvider $ffmpegProvider,
+        protected readonly UploaderFactory $uploaderFactory,
+        protected readonly Filesystem $filesystem,
+        protected readonly StoreManagerInterface $storeManager,
+        protected readonly IoFile $ioFile,
+        protected readonly LoggerInterface $logger,
+        protected readonly FFMpegProvider $ffmpegProvider,
     ) {}
 
     /**
@@ -210,7 +210,7 @@ class FileUploader implements ArgumentInterface
         return $files;
     }
 
-    private function buildMediaUrl(string $relativePath): string
+    protected function buildMediaUrl(string $relativePath): string
     {
         $baseUrl = \rtrim(
             $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_WEB),
