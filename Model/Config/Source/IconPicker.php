@@ -4,45 +4,32 @@ declare(strict_types=1);
 
 namespace Blackbird\HyvaCmsLibrary\Model\Config\Source;
 
-use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Filesystem\Driver\File;
-use Magento\Framework\Module\Dir;
+use Blackbird\HyvaCmsLibrary\Model\IconProvider;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 
+/**
+ * @deprecated Use IconProvider directly, which also exposes theme and native icons.
+ * @see IconProvider
+ */
 class IconPicker implements ArgumentInterface
 {
-    private const MODULE_NAME = 'Blackbird_HyvaCmsLibrary';
-
-    /** @var array<int, array{value: string, label: string, svg: string}>|null */
-    private ?array $options = null;
-
     public function __construct(
-        private readonly Dir $moduleDir,
-        private readonly File $fileDriver,
-    ) {}
+        protected readonly IconProvider $iconProvider,
+    ) {
+    }
 
     /**
      * @return array<int, array{value: string, label: string, svg: string}>
-     * @throws FileSystemException
      */
     public function toOptionArray(): array
     {
-        if ($this->options !== null) {
-            return $this->options;
-        }
-
-        $imagesPath = $this->moduleDir->getDir(self::MODULE_NAME) . '/view/frontend/web/svg';
-
-        $this->options = [];
-        foreach ($this->fileDriver->search('*.svg', $imagesPath) ?: [] as $svgFile) {
-            $value = \pathinfo($svgFile, PATHINFO_FILENAME);
-            $this->options[] = [
-                'value' => $value,
-                'label' => \ucwords(\str_replace('_', ' ', $value)),
-                'svg'   => $this->fileDriver->fileGetContents($svgFile),
-            ];
-        }
-
-        return $this->options;
+        return \array_map(
+            static fn (array $icon): array => [
+                'value' => $icon['name'],
+                'label' => $icon['label'],
+                'svg' => $icon['svg'],
+            ],
+            $this->iconProvider->getLibraryIcons()
+        );
     }
 }

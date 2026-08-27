@@ -1,0 +1,280 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\CmsLiveviewEditor\ViewModel\Icons;
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HyvaCsp;
+use Magento\Backend\Block\Template;
+use Magento\Framework\Escaper;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+/** @var HyvaCsp $hyvaCsp */
+
+/** @var Icons $icons */
+$icons = $viewModels->require(Icons::class);
+
+$listingUrl = $block->getUrl('blackbird_hyvacmslibrary/icon/listing');
+?>
+<dialog x-data="initIconSelect()"
+        @toggle-icon-select.window="initializeModal($event.detail)"
+        @keydown.window.escape="open = false"
+        class="w-screen max-w-161.5 p-0 shadow-xl rounded-lg open:flex flex-col max-h-screen-80"
+        x-show="open"
+        x-htmldialog.noscroll="open = false"
+        x-transition
+        x-cloak>
+
+    <div class="shrink-0 flex items-center gap-4 py-4 px-6 border-b border-nimbus-200 bg-nimbus-50">
+        <span class="size-8 border border-nimbus-300 rounded-md flex items-center justify-center text-meadow-700">
+            <?= /** @noEscape */ $icons->renderHtml('shapes', '', 20, 20, ['aria-hidden' => 'true']) ?>
+        </span>
+        <strong><?= $escaper->escapeHtml(__('Select an Icon')) ?></strong>
+    </div>
+
+    <div class="shrink-0 px-6 py-4 border-b border-nimbus-100">
+        <label class="relative block">
+            <span class="sr-only"><?= $escaper->escapeHtml(__('Search icons')) ?></span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-nimbus-500 pointer-events-none">
+                <?= /** @noEscape */ $icons->renderHtml('search', '', 18, 18, ['aria-hidden' => 'true']) ?>
+            </span>
+            <input type="search"
+                   x-ref="searchInput"
+                   class="form-input w-full pl-10"
+                   placeholder="<?= $escaper->escapeHtmlAttr(__('Search icons…')) ?>"
+                   @input.debounce.200ms="search = $event.target.value; resetVisibleCount(); $nextTick(() => observeSentinel())">
+        </label>
+    </div>
+
+    <div class="grow overflow-y-auto px-6 py-4 space-y-6" x-ref="scrollArea">
+        <template x-if="loading">
+            <div class="flex items-center justify-center gap-2 py-12 text-nimbus-500">
+                <?= /** @noEscape */ $icons->renderHtml('loader-circle', 'animate-spin', 20, 20, ['aria-hidden' => 'true']) ?>
+                <span><?= $escaper->escapeHtml(__('Loading icons…')) ?></span>
+            </div>
+        </template>
+
+        <template x-if="error">
+            <p class="py-12 text-center text-red-600" x-text="error"></p>
+        </template>
+
+        <template x-for="section in visibleSections" :key="section.group">
+            <section>
+                <div class="flex items-baseline justify-between mb-3">
+                    <h3 class="text-sm font-semibold uppercase tracking-wide text-nimbus-700" x-text="section.title"></h3>
+                    <span class="text-xs text-nimbus-500" x-text="section.total"></span>
+                </div>
+                <div class="grid grid-cols-5 gap-2">
+                    <template x-for="icon in section.icons" :key="icon.value">
+                        <button type="button"
+                                @click="selectIcon(icon)"
+                                :title="icon.value"
+                                :class="selected?.value === icon.value
+                                    ? 'border-meadow-700 bg-meadow-50 text-meadow-800'
+                                    : 'border-transparent hover:bg-nimbus-100'"
+                                class="flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition-colors cursor-pointer">
+                            <span class="size-6 flex items-center justify-center" x-html="icon.svg"></span>
+                            <span class="text-xs leading-tight text-center break-all line-clamp-2"
+                                  x-text="icon.name"></span>
+                        </button>
+                    </template>
+                </div>
+            </section>
+        </template>
+
+        <div x-show="hasMoreIcons" x-ref="sentinel" class="h-8"></div>
+
+        <template x-if="!loading && !error && visibleSections.length === 0">
+            <p class="py-12 text-center text-nimbus-500">
+                <?= $escaper->escapeHtml(__('No icon matches your search')) ?>
+            </p>
+        </template>
+    </div>
+
+    <div class="shrink-0 flex gap-4 px-6 py-4 border-t border-nimbus-200">
+        <button type="button"
+                class="btn btn-outline hover:text-primary w-full"
+                @click="open = false">
+            <?= $escaper->escapeHtml(__('Cancel')) ?>
+        </button>
+        <button type="button"
+                class="btn btn-primary w-full"
+                :disabled="!selected"
+                :class="!selected ? 'opacity-50 pointer-events-none' : ''"
+                @click="saveIcon()">
+            <?= $escaper->escapeHtml(__('Select')) ?>
+        </button>
+    </div>
+</dialog>
+
+<script>
+function initIconSelect() {
+    return {
+        open: false,
+        uid: null,
+        fieldName: null,
+        recommended: [],
+        selected: null,
+        search: '',
+        loading: false,
+        error: null,
+        icons: null,
+        visibleCount: 200,
+        chunkSize: 200,
+        observer: null,
+        groupTitles: {
+            recommended: '<?= $escaper->escapeJs(__('Recommended icons')) ?>',
+            theme: '<?= $escaper->escapeJs(__('Theme icons')) ?>',
+            library: '<?= $escaper->escapeJs(__('Library icons')) ?>',
+            lucide: '<?= $escaper->escapeJs(__('All icons')) ?>'
+        },
+
+        async initializeModal({ isOpen, uid, fieldName, fieldValue, recommended = [] } = {}) {
+            this.uid = uid;
+            this.fieldName = fieldName;
+            this.recommended = Array.isArray(recommended) ? recommended : [];
+            this.search = '';
+            this.error = null;
+            this.resetVisibleCount();
+            this.open = isOpen;
+
+            if (this.$refs.searchInput) this.$refs.searchInput.value = '';
+
+            await this.loadIcons();
+
+            this.selected = fieldValue ? this.findStoredIcon(fieldValue) : null;
+
+            this.$nextTick(() => {
+                this.observeSentinel();
+                if (this.$refs.searchInput) this.$refs.searchInput.focus();
+            });
+        },
+
+        async loadIcons() {
+            if (this.icons !== null) return;
+
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await fetch('<?= $escaper->escapeJs($listingUrl) ?>', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+
+                const data = await response.json();
+                this.icons = data.icons ?? [];
+            } catch (err) {
+                console.warn('Error fetching icons:', err);
+                this.error = '<?= $escaper->escapeJs(__('Unable to load icons')) ?>';
+                // icons stays null on purpose, so an expired session does not break the picker for good.
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        findStoredIcon(storedValue) {
+            return (this.icons ?? []).find(icon => icon.value === storedValue) ?? null;
+        },
+
+        get filteredIcons() {
+            const icons = this.icons ?? [];
+            const term = this.search.trim().toLowerCase();
+
+            if (!term) return icons;
+
+            return icons.filter(icon =>
+                icon.name.toLowerCase().includes(term) || icon.label.toLowerCase().includes(term)
+            );
+        },
+
+        get visibleSections() {
+            const icons = this.filteredIcons;
+            if (icons.length === 0) return [];
+
+            const byValue = new Map(icons.map(icon => [icon.value, icon]));
+            const recommended = this.recommended
+                .map(value => byValue.get(value))
+                .filter(Boolean);
+            const recommendedValues = new Set(recommended.map(icon => icon.value));
+
+            const sections = [];
+
+            if (recommended.length > 0) {
+                sections.push(this.buildSection('recommended', recommended, false));
+            }
+
+            for (const group of ['theme', 'library', 'lucide']) {
+                const groupIcons = icons.filter(
+                    icon => icon.group === group && !recommendedValues.has(icon.value)
+                );
+
+                if (groupIcons.length === 0) continue;
+
+                sections.push(this.buildSection(group, groupIcons, group === 'lucide'));
+            }
+
+            return sections;
+        },
+
+        get hasMoreIcons() {
+            return this.visibleSections.some(section => section.hasMore);
+        },
+
+        buildSection(group, icons, paginate) {
+            const shown = paginate ? icons.slice(0, this.visibleCount) : icons;
+
+            return {
+                group,
+                title: this.groupTitles[group],
+                total: icons.length,
+                icons: shown,
+                hasMore: paginate && shown.length < icons.length
+            };
+        },
+
+        resetVisibleCount() {
+            this.visibleCount = this.chunkSize;
+        },
+
+        observeSentinel() {
+            this.observer?.disconnect();
+
+            const sentinel = this.$refs.sentinel;
+            if (!sentinel) return;
+
+            this.observer = new IntersectionObserver(entries => {
+                if (entries.some(entry => entry.isIntersecting)) {
+                    this.visibleCount += this.chunkSize;
+                    this.$nextTick(() => this.observeSentinel());
+                }
+            }, { root: this.$refs.scrollArea, rootMargin: '200px' });
+
+            this.observer.observe(sentinel);
+        },
+
+        selectIcon(icon) {
+            this.selected = icon;
+        },
+
+        saveIcon() {
+            if (!this.selected) return;
+
+            this.$dispatch('editor-change', {
+                name: this.uid,
+                field: this.fieldName,
+                value: this.selected.value,
+                saveState: true
+            });
+
+            this.open = false;
+        }
+    };
+}
+</script>
+<?php if (isset($hyvaCsp)) $hyvaCsp->registerInlineScript(); ?>

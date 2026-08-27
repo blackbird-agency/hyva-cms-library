@@ -5,6 +5,8 @@
         <referenceContainer name="before.body.end">
             <block name="file-uploader-handler"
                    template="Blackbird_HyvaCmsLibrary::field-types/file-uploader-handler.phtml"/>
+            <block name="icon-picker-handler"
+                   template="Blackbird_HyvaCmsLibrary::field-types/icon-picker-handler.phtml"/>
         </referenceContainer>
     </body>
 </page>
