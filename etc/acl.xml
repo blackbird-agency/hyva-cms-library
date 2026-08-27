@@ -6,6 +6,8 @@
             <resource id="Magento_Backend::admin">
                 <resource id="Blackbird_HyvaCmsLibrary::file_upload"
                           title="Hyvä CMS File Upload"/>
+                <resource id="Blackbird_HyvaCmsLibrary::icon_picker"
+                          title="Hyvä CMS Icon Picker"/>
             </resource>
         </resources>
     </acl>

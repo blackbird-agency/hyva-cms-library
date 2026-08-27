@@ -2,21 +2,25 @@
 
 declare(strict_types=1);
 
+use Blackbird\HyvaCmsLibrary\Model\IconProvider;
 use Hyva\CmsLiveviewEditor\ViewModel\Adminhtml\FieldTypes;
+use Hyva\CmsLiveviewEditor\ViewModel\Icons;
+use Hyva\Theme\Model\ViewModelRegistry;
 use Magento\Backend\Block\Template;
 use Magento\Framework\Escaper;
-use Hyva\Theme\Model\ViewModelRegistry;
-use Blackbird\HyvaCmsLibrary\Model\Config\Source\IconPicker;
 
 /** @var Template $block */
 /** @var Escaper $escaper */
 /** @var ViewModelRegistry $viewModels */
 
-/** @var IconPicker $iconSource */
-$iconSource = $viewModels->require(IconPicker::class);
+/** @var IconProvider $iconProvider */
+$iconProvider = $viewModels->require(IconProvider::class);
 
 /** @var FieldTypes $fieldTypes */
 $fieldTypes = $viewModels->require(FieldTypes::class);
+
+/** @var Icons $icons */
+$icons = $viewModels->require(Icons::class);
 
 $uid = (string) $block->getData('uid');
 $fieldName = (string) $block->getData('name');
@@ -24,50 +28,101 @@ $fieldValue = \trim((string) ($block->getData('value') ?? ''));
 $hasError = $block->getData('hasError');
 $errorMessage = (string) ($block->getData('errorMessage') ?? '');
 
-$inputAttributes = (array) $block->getData('attributes');
-$filteredAttributes = $fieldTypes->getAttributesByKeys($inputAttributes, ['required', 'data-required', 'data-required-msg']);
-?>
+$config = (array) ($block->getData('config') ?? []);
+$recommended = \array_values(\array_filter(
+    \array_map('strval', (array) ($config['recommended_icons'] ?? [])),
+    static fn (string $value): bool => $value !== ''
+));
 
-<div class="field-container"
+$inputAttributes = (array) $block->getData('attributes');
+$filteredAttributes = $fieldTypes->getAttributesByKeys(
+    $inputAttributes,
+    ['required', 'data-required', 'data-required-msg']
+);
+
+$selectedIcon = null;
+if ($fieldValue !== '') {
+    foreach ($iconProvider->getIcons() as $icon) {
+        if ($icon['value'] === $fieldValue) {
+            $selectedIcon = $icon;
+            break;
+        }
+    }
+}
+?>
+<div class="field-container relative group"
      id="field-container-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
-     <?= $hasError ? 'data-error' : '' ?>
-     x-data="{ selectedIcon: '<?= $escaper->escapeJs((string) $fieldValue) ?>' }"
->
-    <div class="grid grid-cols-5 gap-3">
-        <?php foreach ($iconSource->toOptionArray() as $icon): ?>
-            <button type="button"
-                    @click="selectedIcon = selectedIcon === '<?= $escaper->escapeJs($icon['value']) ?>' ? '' : '<?= $escaper->escapeJs($icon['value']) ?>';
-                        updateWireField(
-                            '<?= $escaper->escapeJs($uid) ?>',
-                            '<?= $escaper->escapeJs($fieldName) ?>',
-                            selectedIcon
-                        )
-                    "
-                    :class="selectedIcon === '<?= $escaper->escapeJs($icon['value']) ?>'
-                        ? 'border-gray-700 bg-gray-100'
-                        : 'border-transparent'"
-                    class="flex flex-col items-center gap-2 p-3 rounded-lg cursor-pointer transition-all border-2">
-                <?= /** @noEscape */ $icon['svg'] ?>
-                <span class="text-xs">
-                    <?= $escaper->escapeHtml(__($icon['label'])) ?>
-                </span>
-            </button>
-        <?php endforeach ?>
-    </div>
+     tabindex="-1"
+     <?= $hasError ? 'data-error' : '' ?>>
 
     <input type="hidden"
-           x-model="selectedIcon"
            id="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
            name="<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
-           value="<?= $escaper->escapeHtmlAttr((string) $fieldValue) ?>"
+           value="<?= $escaper->escapeHtmlAttr($fieldValue) ?>"
+           @change="
+               updateWireField(
+                   '<?= $escaper->escapeJs($uid) ?>',
+                   '<?= $escaper->escapeJs($fieldName) ?>',
+                   $event.target.value
+               )
+           "
            <?php foreach ($filteredAttributes as $attr => $value): ?>
                <?= $escaper->escapeHtmlAttr($attr) ?>="<?= $escaper->escapeHtmlAttr($value) ?>"
            <?php endforeach ?>>
 
+    <div class="w-full p-3 border border-dashed border-nimbus-200 rounded-md text-nimbus-600
+                group-data-[error]:border-red-500 group-data-[error]:text-red-500 flex flex-col gap-3">
+        <?php if ($selectedIcon !== null): ?>
+            <div class="flex items-center gap-3 border border-nimbus-100 rounded-md p-2">
+                <span class="size-8 shrink-0 flex items-center justify-center text-nimbus-800">
+                    <?= /** @noEscape */ $selectedIcon['svg'] ?>
+                </span>
+                <span class="text-sm truncate" title="<?= $escaper->escapeHtmlAttr($selectedIcon['value']) ?>">
+                    <?= $escaper->escapeHtml($selectedIcon['name']) ?>
+                </span>
+            </div>
+        <?php elseif ($fieldValue !== ''): ?>
+            <p class="text-sm text-red-600">
+                <?= $escaper->escapeHtml(__('Unknown icon: %1', $fieldValue)) ?>
+            </p>
+        <?php else: ?>
+            <p class="text-sm"><?= $escaper->escapeHtml(__('No icon selected')) ?></p>
+        <?php endif ?>
+
+        <div class="flex gap-2">
+            <button type="button"
+                    @click="$dispatch('toggle-icon-select', {
+                        isOpen: true,
+                        uid: '<?= $escaper->escapeJs($uid) ?>',
+                        fieldName: '<?= $escaper->escapeJs($fieldName) ?>',
+                        fieldValue: '<?= $escaper->escapeJs($fieldValue) ?>',
+                        recommended: JSON.parse('<?= $escaper->escapeJs(\json_encode($recommended)) ?>')
+                    })"
+                    class="btn btn-primary justify-center grow">
+                <?= $escaper->escapeHtml($selectedIcon !== null || $fieldValue !== '' ? __('Change Icon') : __('Select Icon')) ?>
+            </button>
+            <?php if ($fieldValue !== ''): ?>
+                <button type="button"
+                        class="btn btn-danger justify-center px-3"
+                        @click="
+                            updateWireField(
+                                '<?= $escaper->escapeJs($uid) ?>',
+                                '<?= $escaper->escapeJs($fieldName) ?>',
+                                null
+                            )
+                        "
+                        aria-label="<?= $escaper->escapeHtmlAttr(__('Remove Icon')) ?>">
+                    <?= /** @noEscape */ $icons->renderHtml('trash-2', '', 20, 20, ['aria-hidden' => 'true']) ?>
+                    <span class="sr-only"><?= $escaper->escapeHtml(__('Remove Icon')) ?></span>
+                </button>
+            <?php endif ?>
+        </div>
+    </div>
+
     <ul id="validation-messages-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
         class="validation-messages list-none">
         <?php if ($hasError): ?>
-            <li class="error-message text-red text-sm mt-1">
+            <li class="error-message text-red-600 text-sm mt-1">
                 <?= $escaper->escapeHtml($errorMessage) ?>
             </li>
         <?php endif ?>

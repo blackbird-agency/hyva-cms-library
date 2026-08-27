@@ -1,9 +1,26 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- An iconPathPrefix without a "Module::" segment is resolved against the current theme's
+         web folder, which gives theme inheritance for free. -->
+    <virtualType name="Blackbird\HyvaCmsLibrary\ViewModel\ThemeIcons" type="Hyva\Theme\ViewModel\SvgIcons">
+        <arguments>
+            <argument name="iconPathPrefix" xsi:type="string">svg</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Blackbird\HyvaCmsLibrary\ViewModel\LucideIcons" type="Hyva\Theme\ViewModel\SvgIcons">
+        <arguments>
+            <argument name="iconPathPrefix" xsi:type="string">Hyva_Theme::svg/lucide</argument>
+        </arguments>
+    </virtualType>
+
     <type name="Blackbird\HyvaCmsLibrary\ViewModel\SvgIcons">
         <arguments>
             <argument name="iconPathPrefix" xsi:type="string">Blackbird_HyvaCmsLibrary::svg</argument>
+            <argument name="renderers" xsi:type="array">
+                <item name="theme" xsi:type="object">Blackbird\HyvaCmsLibrary\ViewModel\ThemeIcons</item>
+                <item name="lucide" xsi:type="object">Blackbird\HyvaCmsLibrary\ViewModel\LucideIcons</item>
+            </argument>
         </arguments>
     </type>
 </config>

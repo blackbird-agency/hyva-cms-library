@@ -13,4 +13,13 @@
             </argument>
         </arguments>
     </type>
+    <type name="Hyva\CmsLiveviewEditor\Plugin\PageConfigAssetCollectionPlugin">
+        <arguments>
+            <argument name="allowedAssets" xsi:type="array">
+                <item name="Blackbird_HyvaCmsLibrary::js/text-color.js" xsi:type="string">
+                    Blackbird_HyvaCmsLibrary::js/text-color.js
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>

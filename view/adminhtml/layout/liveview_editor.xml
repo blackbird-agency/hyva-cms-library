@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="Blackbird_HyvaCmsLibrary::js/text-color.js"/>
+    </head>
     <body>
         <referenceContainer name="before.body.end">
             <block name="file-uploader-handler"
                    template="Blackbird_HyvaCmsLibrary::field-types/file-uploader-handler.phtml"/>
+            <block name="icon-picker-handler"
+                   template="Blackbird_HyvaCmsLibrary::field-types/icon-picker-handler.phtml"/>
         </referenceContainer>
     </body>
 </page>

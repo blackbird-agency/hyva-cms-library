@@ -69,7 +69,13 @@
       "icon": {
         "type": "custom_type",
         "custom_type": "icon_picker",
-        "label": "Icon"
+        "label": "Icon",
+        "config": {
+          "recommended_icons": [
+            "lucide/truck",
+            "lucide/shield-check"
+          ]
+        }
       }
     },
     "design": {
