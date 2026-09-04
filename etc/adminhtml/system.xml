@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="hyva_cms">
+            <group id="icon_picker" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Icon Picker</label>
+                <field id="icon_sets" translate="label comment" type="multiselect" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Icon Sets Offered In The Picker</label>
+                    <comment>Filters what the picker offers. It never affects the rendering of an already selected icon.</comment>
+                    <source_model>Blackbird\HyvaCmsLibrary\Model\Config\Source\IconSets</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

@@ -16,7 +16,11 @@ use Magento\Framework\Escaper;
 /** @var Icons $icons */
 $icons = $viewModels->require(Icons::class);
 
-$listingUrl = $block->getUrl('blackbird_hyvacmslibrary/icon/listing');
+// The AJAX call carries none of the editor's request params, so the content identity travels here.
+$listingUrl = $block->getUrl('blackbird_hyvacmslibrary/icon/listing', \array_filter([
+    'type' => $block->getRequest()->getParam('type'),
+    'id' => $block->getRequest()->getParam('id'),
+]));
 ?>
 <dialog x-data="initIconSelect()"
         @toggle-icon-select.window="initializeModal($event.detail)"
@@ -70,21 +74,39 @@ $listingUrl = $block->getUrl('blackbird_hyvacmslibrary/icon/listing');
                     <template x-for="icon in section.icons" :key="icon.value">
                         <button type="button"
                                 @click="selectIcon(icon)"
-                                :title="icon.value"
+                                @focus="icon.flags && icon.flags.length > 0 && showTooltip($event, icon.flags)"
+                                @blur="tooltip = null"
                                 :class="selected?.value === icon.value
                                     ? 'border-meadow-700 bg-meadow-50 text-meadow-800'
                                     : 'border-transparent hover:bg-nimbus-100'"
-                                class="flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition-colors cursor-pointer">
+                                class="relative flex flex-col items-center gap-1.5 p-2 rounded-lg
+                                       border-2 transition-colors cursor-pointer">
+                            <template x-if="icon.flags && icon.flags.length > 0">
+                                <span class="bb-icon-flags"
+                                      @mouseenter="showTooltip($event, icon.flags)"
+                                      @mouseleave="tooltip = null">
+                                    <template x-for="flag in icon.flags" :key="flag.type">
+                                        <span class="bb-icon-flag"
+                                              :class="'bb-icon-flag--' + flag.type"
+                                              x-html="flagGlyph(flag.type)"></span>
+                                    </template>
+                                </span>
+                            </template>
                             <span class="size-6 flex items-center justify-center" x-html="icon.svg"></span>
                             <span class="text-xs leading-tight text-center break-all line-clamp-2"
                                   x-text="icon.name"></span>
+                            <!-- Focus sits on the button: a focusable element cannot nest inside another one. -->
+                            <template x-if="icon.flags && icon.flags.length > 0">
+                                <span class="sr-only" x-text="icon.flags.map(flag => flag.message).join(' ')"></span>
+                            </template>
                         </button>
                     </template>
                 </div>
+                <template x-if="section.hasMore">
+                    <div :data-sentinel="section.group" class="h-8"></div>
+                </template>
             </section>
         </template>
-
-        <div x-show="hasMoreIcons" x-ref="sentinel" class="h-8"></div>
 
         <template x-if="!loading && !error && visibleSections.length === 0">
             <p class="py-12 text-center text-nimbus-500">
@@ -107,6 +129,16 @@ $listingUrl = $block->getUrl('blackbird_hyvacmslibrary/icon/listing');
             <?= $escaper->escapeHtml(__('Select')) ?>
         </button>
     </div>
+
+    <template x-if="tooltip">
+        <div class="bb-icon-tip" x-ref="tooltip" :style="`top: ${tooltip.y}px; left: ${tooltip.x}px`">
+            <template x-for="(line, index) in tooltip.lines" :key="index">
+                <span class="bb-icon-tip-line"
+                      :class="'bb-icon-tip--' + line.type"
+                      x-text="line.message"></span>
+            </template>
+        </div>
+    </template>
 </dialog>
 
 <script>
@@ -121,15 +153,12 @@ function initIconSelect() {
         loading: false,
         error: null,
         icons: null,
-        visibleCount: 200,
         chunkSize: 200,
+        visibleCounts: {},
         observer: null,
-        groupTitles: {
-            recommended: '<?= $escaper->escapeJs(__('Recommended icons')) ?>',
-            theme: '<?= $escaper->escapeJs(__('Theme icons')) ?>',
-            library: '<?= $escaper->escapeJs(__('Library icons')) ?>',
-            lucide: '<?= $escaper->escapeJs(__('All icons')) ?>'
-        },
+        tooltip: null,
+        groups: [],
+        recommendedTitle: '<?= $escaper->escapeJs(__('Recommended icons')) ?>',
 
         async initializeModal({ isOpen, uid, fieldName, fieldValue, recommended = [] } = {}) {
             this.uid = uid;
@@ -137,6 +166,7 @@ function initIconSelect() {
             this.recommended = Array.isArray(recommended) ? recommended : [];
             this.search = '';
             this.error = null;
+            this.tooltip = null;
             this.resetVisibleCount();
             this.open = isOpen;
 
@@ -169,6 +199,7 @@ function initIconSelect() {
 
                 const data = await response.json();
                 this.icons = data.icons ?? [];
+                this.groups = data.groups ?? [];
             } catch (err) {
                 console.warn('Error fetching icons:', err);
                 this.error = '<?= $escaper->escapeJs(__('Unable to load icons')) ?>';
@@ -201,37 +232,33 @@ function initIconSelect() {
             const recommended = this.recommended
                 .map(value => byValue.get(value))
                 .filter(Boolean);
-            const recommendedValues = new Set(recommended.map(icon => icon.value));
 
             const sections = [];
 
             if (recommended.length > 0) {
-                sections.push(this.buildSection('recommended', recommended, false));
+                sections.push(this.buildSection('recommended', this.recommendedTitle, recommended));
             }
 
-            for (const group of ['theme', 'library', 'lucide']) {
-                const groupIcons = icons.filter(
-                    icon => icon.group === group && !recommendedValues.has(icon.value)
-                );
+            // A recommended icon stays in its own section too: no removal, duplicates are wanted.
+            for (const group of this.groups) {
+                const groupIcons = icons.filter(icon => icon.group === group.code);
 
                 if (groupIcons.length === 0) continue;
 
-                sections.push(this.buildSection(group, groupIcons, group === 'lucide'));
+                sections.push(this.buildSection(group.code, group.label, groupIcons));
             }
 
             return sections;
         },
 
-        get hasMoreIcons() {
-            return this.visibleSections.some(section => section.hasMore);
-        },
-
-        buildSection(group, icons, paginate) {
-            const shown = paginate ? icons.slice(0, this.visibleCount) : icons;
+        buildSection(code, title, icons) {
+            const paginate = icons.length > this.chunkSize;
+            const visible = this.visibleCounts[code] ?? this.chunkSize;
+            const shown = paginate ? icons.slice(0, visible) : icons;
 
             return {
-                group,
-                title: this.groupTitles[group],
+                group: code,
+                title,
                 total: icons.length,
                 icons: shown,
                 hasMore: paginate && shown.length < icons.length
@@ -239,23 +266,67 @@ function initIconSelect() {
         },
 
         resetVisibleCount() {
-            this.visibleCount = this.chunkSize;
+            this.visibleCounts = {};
         },
 
         observeSentinel() {
             this.observer?.disconnect();
 
-            const sentinel = this.$refs.sentinel;
-            if (!sentinel) return;
+            const sentinels = this.$refs.scrollArea?.querySelectorAll('[data-sentinel]') ?? [];
+            if (sentinels.length === 0) return;
 
             this.observer = new IntersectionObserver(entries => {
-                if (entries.some(entry => entry.isIntersecting)) {
-                    this.visibleCount += this.chunkSize;
-                    this.$nextTick(() => this.observeSentinel());
+                let grown = false;
+
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) continue;
+
+                    const group = entry.target.dataset.sentinel;
+                    this.visibleCounts[group] = (this.visibleCounts[group] ?? this.chunkSize) + this.chunkSize;
+                    grown = true;
                 }
+
+                if (grown) this.$nextTick(() => this.observeSentinel());
             }, { root: this.$refs.scrollArea, rootMargin: '200px' });
 
-            this.observer.observe(sentinel);
+            sentinels.forEach(sentinel => this.observer.observe(sentinel));
+        },
+
+        showTooltip(event, flags) {
+            const anchorRect = event.currentTarget.getBoundingClientRect();
+
+            this.tooltip = { lines: flags, x: anchorRect.left, y: anchorRect.bottom + 4 };
+
+            this.$nextTick(() => this.positionTooltip(anchorRect));
+        },
+
+        // Reads the tooltip's rendered size rather than assuming it, so the clamp cannot drift from the CSS.
+        positionTooltip(anchorRect) {
+            const el = this.$refs.tooltip;
+            if (!el || !this.tooltip) return;
+
+            const tipRect = el.getBoundingClientRect();
+            const margin = 8;
+
+            const x = Math.max(margin, Math.min(anchorRect.left, window.innerWidth - tipRect.width - margin));
+
+            const below = anchorRect.bottom + 4;
+            const above = anchorRect.top - tipRect.height - 4;
+            const fitsBelow = below + tipRect.height <= window.innerHeight - margin;
+            const y = fitsBelow ? below : Math.max(margin, above);
+
+            this.tooltip = { ...this.tooltip, x, y };
+        },
+
+        flagGlyph(type) {
+            const open = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"'
+                + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+
+            if (type === 'missing') {
+                return open + '<circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
+            }
+
+            return open + '<path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5"/><path d="M12 18h.01"/></svg>';
         },
 
         selectIcon(icon) {

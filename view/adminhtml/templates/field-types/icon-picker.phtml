@@ -40,15 +40,7 @@ $filteredAttributes = $fieldTypes->getAttributesByKeys(
     ['required', 'data-required', 'data-required-msg']
 );
 
-$selectedIcon = null;
-if ($fieldValue !== '') {
-    foreach ($iconProvider->getIcons() as $icon) {
-        if ($icon['value'] === $fieldValue) {
-            $selectedIcon = $icon;
-            break;
-        }
-    }
-}
+$selectedIcon = $fieldValue !== '' ? $iconProvider->findIcon($fieldValue) : null;
 ?>
 <div class="field-container relative group"
      id="field-container-<?= $escaper->escapeHtmlAttr("{$uid}_{$fieldName}") ?>"
