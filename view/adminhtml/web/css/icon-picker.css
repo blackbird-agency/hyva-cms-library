@@ -1,0 +1,13 @@
+.bb-icon-flags { position: absolute; top: 2px; left: 2px; display: flex; gap: 2px; z-index: 2; }
+.bb-icon-flag { width: 16px; height: 16px; border-radius: 4px; border-width: 1px; border-style: solid;
+    display: flex; align-items: center; justify-content: center; }
+.bb-icon-flag svg { width: 10px; height: 10px; display: block; }
+.bb-icon-flag--divergent, .bb-icon-tip--divergent {
+    background-color: rgba(217, 145, 32, 0.16); border-color: #d99120; color: #96620d; }
+.bb-icon-flag--missing, .bb-icon-tip--missing {
+    background-color: rgba(210, 80, 90, 0.15); border-color: #d2505a; color: #9c3640; }
+.bb-icon-tip { position: fixed; z-index: 60; width: 13rem; padding: 0.375rem; background: #fff;
+    border: 1px solid rgb(220 223 227); border-radius: 0.375rem; pointer-events: none;
+    box-shadow: 0 8px 18px -6px rgb(20 24 30 / 0.4); display: flex; flex-direction: column; gap: 0.25rem; }
+.bb-icon-tip-line { font-size: 10px; line-height: 1.35; padding: 3px 5px; border-radius: 4px;
+    border-width: 1px; border-style: solid; text-align: left; }

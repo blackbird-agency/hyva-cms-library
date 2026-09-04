@@ -25,6 +25,9 @@ class Listing extends Action implements HttpGetActionInterface
 
     public function execute(): Json
     {
-        return $this->jsonFactory->create()->setData(['icons' => $this->iconProvider->getIcons()]);
+        return $this->jsonFactory->create()->setData([
+            'groups' => $this->iconProvider->getGroups(),
+            'icons' => $this->iconProvider->getIcons(),
+        ]);
     }
 }

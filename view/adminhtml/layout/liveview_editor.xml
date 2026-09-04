@@ -3,6 +3,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="Blackbird_HyvaCmsLibrary::js/text-color.js"/>
+        <css src="Blackbird_HyvaCmsLibrary::css/icon-picker.css"/>
     </head>
     <body>
         <referenceContainer name="before.body.end">

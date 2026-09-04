@@ -19,6 +19,9 @@
                 <item name="Blackbird_HyvaCmsLibrary::js/text-color.js" xsi:type="string">
                     Blackbird_HyvaCmsLibrary::js/text-color.js
                 </item>
+                <item name="Blackbird_HyvaCmsLibrary::css/icon-picker.css" xsi:type="string">
+                    Blackbird_HyvaCmsLibrary::css/icon-picker.css
+                </item>
             </argument>
         </arguments>
     </type>
