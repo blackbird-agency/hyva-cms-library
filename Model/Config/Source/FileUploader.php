@@ -213,10 +213,10 @@ class FileUploader implements ArgumentInterface
     protected function buildMediaUrl(string $relativePath): string
     {
         $baseUrl = \rtrim(
-            $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_WEB),
+            $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA),
             '/'
         );
 
-        return $baseUrl . '/media/' . \ltrim($relativePath, '/');
+        return $baseUrl . '/' . \ltrim($relativePath, '/');
     }
 }
