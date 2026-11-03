@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<image_types xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="urn:magento:module:Hyva_MediaOptimization:etc/schema/image_types.xsd">
+    <type name="hyva_cms_mosaic">
+        <variant name="hyva_cms_mosaic_640">
+            <image_width>640</image_width>
+            <min_viewport_width>0</min_viewport_width>
+        </variant>
+        <variant name="hyva_cms_mosaic_1024">
+            <image_width>1024</image_width>
+            <min_viewport_width>768</min_viewport_width>
+        </variant>
+    </type>
+    <type name="hyva_cms_mosaic_desktop">
+        <variant name="hyva_cms_mosaic_desktop_1440">
+            <image_width>1440</image_width>
+            <min_viewport_width>1024</min_viewport_width>
+        </variant>
+        <variant name="hyva_cms_mosaic_desktop_1920">
+            <image_width>1920</image_width>
+            <min_viewport_width>1440</min_viewport_width>
+        </variant>
+    </type>
+</image_types>

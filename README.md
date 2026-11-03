@@ -44,8 +44,6 @@ No manipulations required, instant use after installation.
 composer require blackbird/hyva-cms-library
 ```
 
-Move the `tailwind/increment.css` file into your theme's `tailwind/components/` folder.
-
 ### Install the Module
 
 Go to your Magento root directory, then run the following Magento commands:

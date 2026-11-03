@@ -62,10 +62,9 @@ $pictureClasses = 'absolute w-full h-full';
 >
     <?php if ($image): ?>
         <?php
-        $desktopImage = $block->getData('desktop_image') ?: $image;
         $imageData = array_filter([
-            $block->getResponsiveImageData($image, 'hyva_cms_mosaic'),
-            $block->getResponsiveImageData($desktopImage, 'hyva_cms_mosaic_desktop', ['media' => '(min-width: 1024px)'])
+            $block->getResponsiveImageData($mobileImage, 'hyva_cms_mosaic'),
+            $block->getResponsiveImageData($image, 'hyva_cms_mosaic_desktop', ['media' => '(min-width: 1024px)'])
         ]);
         $imgTagAttributes = ['alt' => '', 'loading' => $imageLoading, 'class' => $imageClasses];
         $pictureTagAttributes = ['class' => $pictureClasses];
